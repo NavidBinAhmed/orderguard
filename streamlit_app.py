@@ -10,11 +10,21 @@ from pathlib import Path
 import sys
 import sklearn.compose._column_transformer
 import types
-import sklearn.ensemble
+import sklearn.compose._column_transformer
 
 st.set_page_config(page_title="OrderGuard", layout="wide", page_icon="📦")
 
 
+# FORCED COMPATIBILITY PATCH: Define and inject the missing legacy class globally
+class _RemainderColsList(list): 
+    pass
+
+# Bind the class back into the module's attribute list
+sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
+
+# Inject it straight into the global execution registry so pickle can find it anywhere
+sys.modules['sklearn.compose._column_transformer._RemainderColsList'] = _RemainderColsList
+    
 # Direct, high-speed path configuration targeting the results subfolder
 RESULTS_DIR = pathlib.Path(__file__).parent.resolve() / "results"
 DATA_DIR = RESULTS_DIR
