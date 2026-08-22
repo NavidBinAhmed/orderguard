@@ -14,58 +14,69 @@ import sklearn.compose._column_transformer
 
 st.set_page_config(page_title="OrderGuard", layout="wide", page_icon="📦")
 
-# COMPLETE BACKWARD-COMPATIBILITY EMULATION ENGINE
-# Create the fake _loss module
-if "sklearn.ensemble._loss" not in sys.modules:
+import sys
+import types
+import pathlib
+import joblib
+import pandas as pd
+import streamlit as st
+
+# 1. STRUCTURAL NAMESPACE INJECTION (Must run before any scikit-learn references)
+def inject_mock_modules():
+    # Construct the primary _loss wrapper framework
     fake_loss_mod = types.ModuleType("sklearn.ensemble._loss")
-    # Add dummy classes commonly expected during older unpickling routines
-    class DummyLoss: 
+    
+    class DummyLoss:
         def __init__(self, *args, **kwargs): pass
     
+    # Pre-populate all historical variants expected by older model binaries
     fake_loss_mod.HalfBinomialLoss = DummyLoss
     fake_loss_mod.AbsoluteError = DummyLoss
     fake_loss_mod.LeastSquaresError = DummyLoss
     fake_loss_mod.BinomialDeviance = DummyLoss
     
-    # Register it globally
-    sys.modules["sklearn.ensemble._loss"] = fake_loss_mod
-
-# Create the fake _gb_losses module
-if "sklearn.ensemble._gb_losses" not in sys.modules:
-    fake_gb_losses = types.ModuleType("sklearn.ensemble._gb_losses")
-    class DummyGB:
-        def __init__(self, *args, **kwargs): pass
-    fake_gb_losses.LossFunction = DummyGB
-    fake_gb_losses.LeastSquaresError = DummyGB
+    # FIXED: Added the specific Cythonized loss class to prevent the AttributeError
+    fake_loss_mod.CyHalfSquaredError = DummyLoss
     
-    sys.modules["sklearn.ensemble._gb_losses"] = fake_gb_losses
+    # Establish parent alignment so Python resolves the import tree natively
+    sys.modules["sklearn.ensemble._loss"] = fake_loss_mod
+    sys.modules["_loss"] = fake_loss_mod  # Explicit fallback for localized searches
 
-# Fix the internal column transformer tracking list framework
+    # Construct the legacy _gb_losses framework
+    fake_gb_losses = types.ModuleType("sklearn.ensemble._gb_losses")
+    fake_gb_losses.LossFunction = DummyLoss
+    fake_gb_losses.LeastSquaresError = DummyLoss
+    sys.modules["sklearn.ensemble._gb_losses"] = fake_gb_losses
+    sys.modules["_gb_losses"] = fake_gb_losses
+
+inject_mock_modules()
+
+# 2. COLUMN TRANSFORMER EXTENSION PATCH
 import sklearn.compose._column_transformer
-class _RemainderColsList(list): 
-    pass
+class _RemainderColsList(list): pass
 sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
 sys.modules['sklearn.compose._column_transformer._RemainderColsList'] = _RemainderColsList
 
-# PATH CONFIGURATIONS
+# 3. DIRECT PATH TARGETS
 RESULTS_DIR = pathlib.Path(__file__).parent.resolve() / "results"
 DATA_DIR = RESULTS_DIR
 
-# HIGH-SPEED LOADERS
+# 4. STREAMLIT CACHED PIPELINES
 @st.cache_resource
 def load_models():
-    """Loads models safely using comprehensive runtime patches."""
+    """Loads models safely with direct sub-module injections."""
     clf = joblib.load(RESULTS_DIR / "loss_classifier.joblib")
     reg = joblib.load(RESULTS_DIR / "severity_regressor.joblib")
     return clf, reg
 
 @st.cache_data
 def load_data():
-    """Loads framework data directly."""
+    """Loads framework data arrays directly."""
     scored = pd.read_csv(RESULTS_DIR / "orders_scored.csv")
     queue = pd.read_csv(RESULTS_DIR / "expert_review_queue.csv")
     type_medians = pd.read_csv(RESULTS_DIR / "loss_type_medians.csv", index_col=0).squeeze('columns')
     return scored, queue, type_medians
+
 
 
 
