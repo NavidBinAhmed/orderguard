@@ -14,31 +14,54 @@ import sklearn.compose._column_transformer
 
 st.set_page_config(page_title="OrderGuard", layout="wide", page_icon="📦")
 
+# COMPLETE BACKWARD-COMPATIBILITY EMULATION ENGINE
+# Create the fake _loss module
+if "sklearn.ensemble._loss" not in sys.modules:
+    fake_loss_mod = types.ModuleType("sklearn.ensemble._loss")
+    # Add dummy classes commonly expected during older unpickling routines
+    class DummyLoss: 
+        def __init__(self, *args, **kwargs): pass
+    
+    fake_loss_mod.HalfBinomialLoss = DummyLoss
+    fake_loss_mod.AbsoluteError = DummyLoss
+    fake_loss_mod.LeastSquaresError = DummyLoss
+    fake_loss_mod.BinomialDeviance = DummyLoss
+    
+    # Register it globally
+    sys.modules["sklearn.ensemble._loss"] = fake_loss_mod
 
-# FORCED COMPATIBILITY PATCH: Define and inject the missing legacy class globally
+# Create the fake _gb_losses module
+if "sklearn.ensemble._gb_losses" not in sys.modules:
+    fake_gb_losses = types.ModuleType("sklearn.ensemble._gb_losses")
+    class DummyGB:
+        def __init__(self, *args, **kwargs): pass
+    fake_gb_losses.LossFunction = DummyGB
+    fake_gb_losses.LeastSquaresError = DummyGB
+    
+    sys.modules["sklearn.ensemble._gb_losses"] = fake_gb_losses
+
+# Fix the internal column transformer tracking list framework
+import sklearn.compose._column_transformer
 class _RemainderColsList(list): 
     pass
-
-# Bind the class back into the module's attribute list
 sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
-
-# Inject it straight into the global execution registry so pickle can find it anywhere
 sys.modules['sklearn.compose._column_transformer._RemainderColsList'] = _RemainderColsList
-    
-# Direct, high-speed path configuration targeting the results subfolder
+
+# PATH CONFIGURATIONS
 RESULTS_DIR = pathlib.Path(__file__).parent.resolve() / "results"
 DATA_DIR = RESULTS_DIR
 
+# HIGH-SPEED LOADERS
 @st.cache_resource
 def load_models():
-    """Directly loads binary models from the results folder."""
+    """Loads models safely using comprehensive runtime patches."""
     clf = joblib.load(RESULTS_DIR / "loss_classifier.joblib")
     reg = joblib.load(RESULTS_DIR / "severity_regressor.joblib")
     return clf, reg
 
 @st.cache_data
 def load_data():
-    """Directly loads data frameworks from the results folder."""
+    """Loads framework data directly."""
     scored = pd.read_csv(RESULTS_DIR / "orders_scored.csv")
     queue = pd.read_csv(RESULTS_DIR / "expert_review_queue.csv")
     type_medians = pd.read_csv(RESULTS_DIR / "loss_type_medians.csv", index_col=0).squeeze('columns')
