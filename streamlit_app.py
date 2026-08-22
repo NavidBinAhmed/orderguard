@@ -68,8 +68,8 @@ page = st.sidebar.radio(
 
 st.sidebar.markdown("---")
 st.sidebar.caption(
-    "Built on a two-part model: P(loss) × E[loss amount | loss]. "
     "See 'Model notes & limitations' before making decisions with this tool."
+    "Development and design: Navid Bin Ahmed, 2026"
 )
 
 # ---------------------------------------------------------------------------
