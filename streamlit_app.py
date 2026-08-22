@@ -1,11 +1,3 @@
-"""
-Risk-Adjusted Order Value — interactive dashboard
-Run with: streamlit run streamlit_app.py
-Requires (same folder): loss_classifier.joblib, severity_regressor.joblib,
-                         orders_scored.csv, expert_review_queue.csv, loss_type_medians.csv
-(all produced by risk_modelling_analysis.ipynb — run the notebook first.)
-"""
-
 import pathlib
 
 import numpy as np
@@ -23,26 +15,25 @@ import sklearn.ensemble
 st.set_page_config(page_title="OrderGuard", layout="wide", page_icon="📦")
 
 
-
-DATA_DIR = pathlib.Path(__file__).parent.resolve()
-
-
-# ---------------------------------------------------------------------------
-# Load artefacts (cached so the app doesn't reload models on every interaction)
-# ---------------------------------------------------------------------------
+# Direct, high-speed path configuration targeting the results subfolder
+RESULTS_DIR = pathlib.Path(__file__).parent.resolve() / "results"
+DATA_DIR = RESULTS_DIR
 
 @st.cache_resource
 def load_models():
-    clf = joblib.load(DATA_DIR / "results/loss_classifier.joblib")
-    reg = joblib.load(DATA_DIR / "results/severity_regressor.joblib")
+    """Directly loads binary models from the results folder."""
+    clf = joblib.load(RESULTS_DIR / "loss_classifier.joblib")
+    reg = joblib.load(RESULTS_DIR / "severity_regressor.joblib")
     return clf, reg
 
 @st.cache_data
 def load_data():
-    scored = pd.read_csv(DATA_DIR / "results/orders_scored.csv")
-    queue = pd.read_csv(DATA_DIR / "results/expert_review_queue.csv")
-    type_medians = pd.read_csv(DATA_DIR / "results/loss_type_medians.csv", index_col=0).iloc[:, 0]
+    """Directly loads data frameworks from the results folder."""
+    scored = pd.read_csv(RESULTS_DIR / "orders_scored.csv")
+    queue = pd.read_csv(RESULTS_DIR / "expert_review_queue.csv")
+    type_medians = pd.read_csv(RESULTS_DIR / "loss_type_medians.csv", index_col=0).squeeze('columns')
     return scored, queue, type_medians
+
 
 
 
@@ -52,7 +43,7 @@ missing_files = [f for f in ["loss_classifier.joblib", "severity_regressor.jobli
 if missing_files:
     st.error(
         "Missing model artefacts: " + ", ".join(missing_files) +
-        ".\n\nRun `risk_modelling_analysis.ipynb` end-to-end first — its last cells save "
+        ".\n\nRun `TeleShop_Intelligence.ipynb` end-to-end first — its last cells save "
         "these files into the same folder as this app."
     )
     st.stop()
@@ -140,7 +131,7 @@ if page == "Score a new order":
         elif proba < 0.25:
             st.warning("Moderate flagged risk. Consider tighter payment terms or route review rather than declining.")
         else:
-            st.error("WARNING: Elevated flagged risk. Recommend human underwriting review before proceeding — "
+            st.error("️️️⚠️ WARNING: Elevated flagged risk. Recommend human underwriting review before proceeding — "
                      "not an automatic decline.")
 
         st.caption(
@@ -290,8 +281,5 @@ Combined into **expected loss = P(loss) × severity**, and **risk-adjusted value
   human underwriting for high-value + high-risk orders) — **not** as an automatic decline rule.
 - Alongside buyer-relevance scores, so the business can test — with a genuine held-out comparison — whether
   ranking by risk-adjusted value actually improves outcomes over ranking by relevance alone.
-- With the expert review queue kept in the loop for the subset of records with low-confidence labels.
-
-Full reasoning for these choices — including the parts of the brief this app doesn't attempt to answer with
-a model — is in `risk_modelling_analysis.ipynb`, Part 3.
+- With the expert review queue kept in the loop for the subset of records with low-confidence labels..
 """)
