@@ -309,7 +309,7 @@ Two models, trained on historical shipped orders:
 
 Combined into **expected loss = P(loss) × severity**, and **risk-adjusted value = order value − expected loss**.
 
-### What thus tool can't do - human intervention is still required
+### What this tool can't do - human intervention is still required
 - **Sparse tail events.** Only 12 `default`-type losses exist in the training data (5 with a logged dollar
   amount). No model — this one included — can reliably estimate default risk for an individual order from
   that few examples. Treat any default-adjacent flag as a prompt for human underwriting, not a probability
