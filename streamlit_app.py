@@ -115,7 +115,7 @@ st.sidebar.caption(
     "See 'Model notes & limitations' before making decisions with this tool."
 )
 st.sidebar.caption(
-    "Research, design, and development : Navid Bin Ahmed"
+    "Research, design, and development by : Navid Bin Ahmed"
 )
 
 
@@ -272,7 +272,7 @@ elif page == "Expert review queue":
     st.caption(
         "Orders where the loss label is confirmed-but-estimated, or where informal notes hint at a "
         "near-miss that was never formally logged as a loss. Built for a human reviewer, not for silent "
-        "model consumption — see Notebook §2.6."
+        "model consumption."
     )
 
     tiers = expert_queue["confidence_tier"].unique().tolist()
