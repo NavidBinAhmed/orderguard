@@ -113,8 +113,11 @@ page = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.caption(
     "See 'Model notes & limitations' before making decisions with this tool."
-    "Development and design: Navid Bin Ahmed, 2026"
 )
+st.sidebar.caption(
+    "Research, design, and development : Navid Bin Ahmed"
+)
+
 
 # ---------------------------------------------------------------------------
 # Shared scoring function
@@ -300,13 +303,13 @@ else:
     st.title("Model notes & limitations")
     st.markdown("""
 ### What this tool does
-Two models, trained on 1,400 historical shipped orders:
+Two models, trained on historical shipped orders:
 - **Classifier** → P(order incurs a loss)
-- **Severity regressor** (trained only on the ~210 loss events) → expected loss size *if* a loss occurs
+- **Severity regressor** (trained on the ~210 loss events) → expected loss size *if* a loss occurs
 
 Combined into **expected loss = P(loss) × severity**, and **risk-adjusted value = order value − expected loss**.
 
-### What it can't do
+### What thus tool can't do - human intervention is still required
 - **Sparse tail events.** Only 12 `default`-type losses exist in the training data (5 with a logged dollar
   amount). No model — this one included — can reliably estimate default risk for an individual order from
   that few examples. Treat any default-adjacent flag as a prompt for human underwriting, not a probability
