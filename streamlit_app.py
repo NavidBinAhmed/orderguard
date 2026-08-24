@@ -14,14 +14,7 @@ import sklearn.compose._column_transformer
 
 st.set_page_config(page_title="OrderGuard", layout="wide", page_icon="📦")
 
-import sys
-import types
-import pathlib
-import joblib
-import pandas as pd
-import streamlit as st
-
-# 1. STRUCTURAL NAMESPACE INJECTION (Must run before any scikit-learn references)
+# STRUCTURAL NAMESPACE INJECTION (Must run before any scikit-learn references)
 def inject_mock_modules():
     # Construct the primary _loss wrapper framework
     fake_loss_mod = types.ModuleType("sklearn.ensemble._loss")
@@ -51,17 +44,17 @@ def inject_mock_modules():
 
 inject_mock_modules()
 
-# 2. COLUMN TRANSFORMER EXTENSION PATCH
+# COLUMN TRANSFORMER EXTENSION PATCH
 import sklearn.compose._column_transformer
 class _RemainderColsList(list): pass
 sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
 sys.modules['sklearn.compose._column_transformer._RemainderColsList'] = _RemainderColsList
 
-# 3. DIRECT PATH TARGETS
+# DIRECT PATH TARGETS
 RESULTS_DIR = pathlib.Path(__file__).parent.resolve() / "results"
 DATA_DIR = RESULTS_DIR
 
-# 4. STREAMLIT CACHED PIPELINES
+# STREAMLIT CACHED PIPELINES
 @st.cache_resource
 def load_models():
     """Loads models safely with direct sub-module injections."""
@@ -76,9 +69,6 @@ def load_data():
     queue = pd.read_csv(RESULTS_DIR / "expert_review_queue.csv")
     type_medians = pd.read_csv(RESULTS_DIR / "loss_type_medians.csv", index_col=0).squeeze('columns')
     return scored, queue, type_medians
-
-
-
 
 
 missing_files = [f for f in ["loss_classifier.joblib", "severity_regressor.joblib",
