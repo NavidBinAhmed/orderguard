@@ -1,5 +1,5 @@
 ## Order Guard - Your Trusted Deal Companion
-This tool encompasses the research, training and development of a `dual-ML algorithm based model`, that enables businesses to predict and compute the tentative loss for taking predictive measures, following a sparse-rarely orccuring target events, i.e., loss.
+This tool encompasses the research, training and development of a `dual-ML algorithm based model`, that enables businesses to predict and compute the tentative loss with a view to taking predictive measures in advance, following sparse-rarely orccuring target events, i.e., loss.
 
 
 ### Authors:
@@ -7,9 +7,7 @@ This tool encompasses the research, training and development of a `dual-ML algor
 - `Dev`: Navid Bin Ahmed
 - 23-Aug 2026
 
-#### Link:
-App : [Link](orderguard.streamlit.app)
-
+#### App: [Link](https://orderguard.streamlit.app)
 
 #### Tools Used:
 - Python 3
