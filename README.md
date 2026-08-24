@@ -34,3 +34,4 @@ Two models, trained on historical shipped orders:
 
 
 #### Confidentiality
+- Synthetic dataset was used to conduct this PoC research and develop the tool
